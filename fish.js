@@ -1,82 +1,153 @@
-const canvass = document.querySelector("canvas")
-const ctx = canvass.getContext("2d")
+const c = document.querySelector("canvas")
+const ctx = c.getContext("2d")
 
-class Wall {
-    constructor(x, y, width, height) {
-        this.x = x;
-        this.y = y;
-        this.w = width;
-        this.h = height;
-    }
-
-    draw() {
-        ctx.fillStyle = 'black'
-        ctx.fillRect(this.x, this.y, this.w, this.h);
-    }
-
-    update() {
-        this.draw()
-    }
-}
-
-class egg {
+class Fish {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-    }
 
-    draw() {
-        ctx.fillStyle = 'green'
-        ctx.fillRect(this.x, this.y, 10, 10);
-    }
+        this.size = {
+            x:20,
+            y:10
+        }
 
-    update() {
-        this.draw()
-    }
-}
-
-class fish {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
         this.vel = {
-            x: 5,
-            y: 0
+            x:0,
+            y:0
+        }
+
+        this.health = 100;
+        this.hunger = 10;
+
+        this.age = 0;
+        this.condition = 'healthy';
+    }
+
+    draw() {
+        ctx.fillStyle = 'black';
+        ctx.fillRect(this.x, this.y, this.size.x, this.size.y);
+    }
+
+    healthbar() {
+        ctx.fillStyle = 'green';
+        ctx.fillRect(10, 10, this.health, 10) 
+        
+    }
+
+    update() {
+        this.healthbar()
+        const choice =  Math.floor(Math.random() * 150);
+        if (choice == 1) {
+            this.vel.x = 1;
+        }
+        if (choice == 2) {
+            this.vel.y = 1;
+        }
+        if (choice == 3) {
+            this.vel.x = -1;
+        }
+        if (choice == 4) {
+            this.vel.y = -1;
+        }
+        if (choice == 5) {
+            this.vel.x = 0;
+        }
+        if (choice == 6) {
+            this.vel.y = 0;
+        }
+
+
+
+        this.draw();
+        this.x += this.vel.x
+        this.y += this.vel.y
+
+        if (this.x <= 0) {
+            this.vel.x = -this.vel.x
+        }
+        if (this.x >= c.width) {
+            this.vel.x = -this.vel.x
+        }
+        if (this.y <= 0) {
+            this.vel.y = -this.vel.y
+        }
+        if (this.y >= c.height) {
+            this.vel.y = -this.vel.y
         }
     }
+}
+
+class Plant {
+    constructor(x, y, spriteIndex) {
+        this.x = x;
+        this.y = y;
+
+        this.size = {
+            x:0,
+            y:0
+        }
+
+        this.spriteIndex = spriteIndex
+
+        this.age = 0
+    }
 
     draw() {
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(this.x, this.y, 20, 10)
+        ctx.fillStyle = 'black';
+        if (this.spriteIndex == 0) {
+            this.size.x = 10
+            this.size.y = -50
+        }
+        if (this.spriteIndex == 1) {
+            this.size.x = 50
+            this.size.y = -20
+        }
+        if (this.spriteIndex == 2) {
+            this.size.x = 4
+            this.size.y = -80
+        }
+        ctx.fillRect(this.x, this.y, this.size.x, this.size.y)
     }
 
     update() {
-        this.draw();
-        this.x += 10
+        this.draw()
     }
 }
 
+const plantArr = [];
+const fish = new Fish(c.width/2, c.height/2);
 
-const bottomWall = new Wall(10, 140, canvass.width-20, 10/5);
-const leftWall = new Wall(10, 140, 10/5, -75);
-const rightWall = new Wall(canvass.width-10, 142, 10/5, -75);
-const Egg = new egg(40, 130)
-const Fish = new fish(10, 10)
+for (let i=0; i<4; i++) {
+    var posx = Math.floor(Math.random() * c.width);
+    var spriteIndex = Math.floor(Math.random() * 3)
+    const plant = new Plant(posx, c.height, spriteIndex)
+    plantArr.push(plant)
+}
+
+function gameLoop() {
+    window.requestAnimationFrame(gameLoop);
 
 
-var counter = 0
+    
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, c.width, c.height);
 
-while (counter != 10) {
-    ctx.fillStyle = 'white'
-    ctx.fillRect(0, 0, canvass.width, canvass.height)
-    bottomWall.update();
-    leftWall.update();
-    rightWall.update();
-    Egg.update()
-    Fish.update()
-    counter ++
+    //drawing the areas for the health and hunger meter
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.rect(10, 10, 100, 10);
+    ctx.stroke();
+    fish.update();
+
+    for (let i=0; i<plantArr.length; i++) {
+        plantArr[i].update()
+    }
     
 }
 
+function feed() {
+    console.log('clicked')
+}
 
 
+gameLoop()
